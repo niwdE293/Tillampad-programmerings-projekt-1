@@ -69,13 +69,6 @@ void setup(){
 }
 
 
-
-void ledRing(){
-  
-}
-
-
-
 // Sets the light color depending on the temperature.
 void ledRingBrightness(){
 
@@ -152,17 +145,7 @@ float getWallAngle(){
   float height = diagonalRightDistance() * sin20;
   float base = (diagonalRightDistance() * cos20) - rightDistance();
   
-
   wallAngle = atan2(base, height) * (180 / PI);
-
-  /*if (base == 0) {
-    wallAngle = 0;
-  }
-  else {
-    wallAngle = atan2(base, height) * (180 / PI);
-  }
-  */
-  Serial.println("Car angle: ");
   return wallAngle;
 }
 
@@ -230,7 +213,7 @@ void drive () {
       goRight();
     }
     else if (leftDistanceFromCar > (targetDistance * (1 + driveMargin)) || (getWallAngle() > wallAngleMargin)){ 
-      if (getWallAngle() < -45){
+      if (getWallAngle() < -35){
         goForward();
       }
       else {
@@ -245,27 +228,9 @@ void drive () {
 
 
 
-void loop () {
-  //ledRing();
-  //ledRingBrightness(); // Updates the background light color using the current temperature.
+void loop(){
+  ledRingBrightness(); // This function updates the background light color using the current temperature.
 
-  drive();
-
-  //Serial.println("Right sensor distance: ");
-  //Serial.println(rightDistance());
- 
-  //Serial.println("Diagonal right sensor distance: ");
-  //Serial.println(diagonalRightDistance());
-
-  //delay(1000);
-
-  //Serial.println("Diagonal right target distance: ");
-  //Serial.println(diagonalTargetDistance());
-
-  //delay(1000);
-
-  //Serial.println(getWallAngle());
-
-  //delay(1000);
+  drive(); // This function drives the car.
 }
 
