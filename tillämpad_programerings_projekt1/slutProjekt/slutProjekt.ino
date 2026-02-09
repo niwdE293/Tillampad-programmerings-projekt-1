@@ -2,7 +2,7 @@
   Project: Clock and temperature project
   Author: Edwin Ädel
   Date: 2025-11-07
-  Description: Displays the time on a led ring and displays tempreture on a screen and servo.
+  Description: This program uses ultrasonic sensors to calculates how the car should drive and it also has a ledring which uses a light sensor to know when to turn on the ledring.
 */
 
 // Include libraries 
@@ -19,13 +19,14 @@
 #define ECHO1 13
 #define TRIG2 11
 #define ECHO2 10
+/*
 #define TRIG3 9
 #define ECHO3 8
 #define TRIG4 7
 #define ECHO4 6
 #define TRIG5 2
 #define ECHO5 1
-
+*/
 
 // Constructs objects
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NO_ACK);
@@ -33,18 +34,16 @@ RTC_DS3231 rtc;
 Adafruit_NeoPixel ring(LED_COUNT, LED_PIN, NEO_RGB + NEO_KHZ800);
 
 const int lightSensorPin = A0;
-const int lightThreshHold = 900;
+const int lightThreshHold = 900; // How bright it needs to be to turn on the ledring.
 
 const int rightMotor = 3; // relay controlling motor
 const int leftMotor = 5; // relay controlling motor
 
-const int targetDistance = 10; // Target distance in cm.
+const int targetDistance = 20; // Target distance in cm.
 
-const float driveMargin = 0.2;
-int wallAngleMargin = 15;
+const float driveMargin = 0.2; // The margin in targetDistance in %
 
-
-const float diagonalSensorOffset = 5.8; //7.0876
+const float diagonalSensorOffset = 5.8; 
 const float sideSensorOffset = 6.3805;
 const float frontSensorOffset = 7.3805;
 
@@ -60,7 +59,14 @@ void setup(){
   pinMode(ECHO1, INPUT);
   pinMode(TRIG2, OUTPUT);
   pinMode(ECHO2, INPUT);
-
+/*
+  pinMode(TRIG3, OUTPUT);
+  pinMode(ECHO3, INPUT);
+  pinMode(TRIG4, OUTPUT);
+  pinMode(ECHO4, INPUT);
+  pinMode(TRIG5, OUTPUT);
+  pinMode(ECHO5, INPUT);
+*/
   pinMode(rightMotor, OUTPUT);
   pinMode(leftMotor, OUTPUT);
 
@@ -82,8 +88,7 @@ void ledRingBrightness(){
   if (inverted < lightThreshHold){
     lightValue = 0;
   }
-  
-  Serial.println(lightValue);
+
   ring.setBrightness(lightValue); //Brightness: 0 - 255
   ring.show(); // Turns on the lights.
   ring.clear(); // Clears the lights.
@@ -183,7 +188,7 @@ void drive () {
   Serial.println(rightDistanceFromCar);
   //Serial.println("Left distance from car");
   //Serial.println(leftDistanceFromCar);
-  delay(1000);
+  //delay(1000);
 
   if (rightDistanceFromCar < leftDistanceFromCar){
     // Right Side 
@@ -202,22 +207,24 @@ void drive () {
       }
     }
     else {
-      Serial.println("Else funtion");
       goForward();
     }
   }
 
   else {
     //Left side
-    if (leftDistanceFromCar < (targetDistance * (1 - driveMargin)) || (getWallAngle() < - wallAngleMargin)){ 
+    if (rightDistanceFromCar < (targetDistance * (1 - driveMargin))){ 
       goRight();
     }
-    else if (leftDistanceFromCar > (targetDistance * (1 + driveMargin)) || (getWallAngle() > wallAngleMargin)){ 
+
+    else if (rightDistanceFromCar > (targetDistance * (1 + driveMargin))){ 
       if (getWallAngle() < -35){
         goForward();
+        Serial.println("Under -35 degrees");
       }
       else {
         goLeft();
+        Serial.println("Over -35 degrees");
       }
     }
     else {
